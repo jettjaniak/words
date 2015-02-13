@@ -12,6 +12,7 @@ class Language(models.Model):
 class Word(models.Model):
     language = models.ForeignKey(Language)
     word = models.CharField(max_length=200)
+    elementary_words = models.ManyToManyField('self', blank=True, null=True)
     note = models.CharField(max_length=100)
 
     class Meta:
