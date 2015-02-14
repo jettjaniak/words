@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block header %}Translation List{% endblock %}
+{% block main %}
+    <ul data-role="listview">
+    {% for t in object_list %}
+        <li>{{ t }}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

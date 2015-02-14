@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from django.views.generic import ListView
+from app.models import Translation
 
-# Create your views here.
+
+class TranslationListView(ListView):
+    model = Translation
+    template_name = 'translation_list.html'
