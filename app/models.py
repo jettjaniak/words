@@ -12,7 +12,7 @@ class Language(models.Model):
 class Word(models.Model):
     language = models.ForeignKey(Language)
     word = models.CharField(max_length=200)
-    note = models.CharField(max_length=100)
+    note = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         unique_together = ('language', 'word')
@@ -32,7 +32,7 @@ class Category(models.Model):
 class Translation(models.Model):
     words = models.ManyToManyField(Word, related_name='translations')
     categories = models.ManyToManyField(Category)
-    note = models.CharField(max_length=400)
+    note = models.CharField(max_length=400, blank=True, null=True)
 
     def languages(self):
         """
