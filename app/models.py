@@ -13,6 +13,7 @@ class Word(models.Model):
     language = models.ForeignKey(Language)
     word = models.CharField(max_length=200)
     note = models.CharField(max_length=100, blank=True, null=True)
+    elementary_words = models.ManyToManyField('self', blank=True, null=True)
 
     class Meta:
         unique_together = ('language', 'word')
