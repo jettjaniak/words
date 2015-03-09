@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}{% block header %}Translation Create{% endblock %}{% endblock %}
+{% block main %}
+    <div class="row">
+        <form method="post">{% csrf_token %}
+            <div class="col-sm-5"><input type="text" class="form-control" placeholder="Polish words" name="polish" data-role="tagsinput"></div>
+            <div class="col-sm-5"><input type="text" class="form-control" placeholder="English words" name="english" data-role="tagsinput"></div>
+            <div class="col-sm-2"><input class="btn btn-primary btn-block" type="submit" value="Create"></div>
+        </form>
+    </div>
+{% endblock %}
