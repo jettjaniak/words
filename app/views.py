@@ -1,6 +1,12 @@
 from django import forms
-from django.views.generic import ListView, FormView
+from django.shortcuts import get_object_or_404, render
+from django.views.generic import ListView, FormView, View
 from app.models import Translation, Word, Language
+
+
+def get_languages(kwargs):
+    return \
+        [get_object_or_404(Language, code=kwargs['lang1']), get_object_or_404(Language, code=kwargs['lang2'])]
 
 
 class TranslationListView(ListView):
@@ -10,28 +16,37 @@ class TranslationListView(ListView):
 
 class TranslationCreateForm(forms.Form):
     # TODO: validator
-    english = forms.CharField()
-    polish = forms.CharField()
+    lang1_words = forms.CharField()
+    lang2_words = forms.CharField()
 
 
-class TranslationCreateView(FormView):
-    template_name = 'translation_create.html'
+class TranslationCreateView(View):
     form_class = TranslationCreateForm
-    success_url = '/translation-create/'
 
-    def form_valid(self, form):
-        polish_words = form.cleaned_data['polish'].split(',')
-        english_words = form.cleaned_data['english'].split(',')
-        polish = Language.objects.get(code='pl')
-        english = Language.objects.get(code='en')
-        words_ids = []
-        for p in polish_words:
-            w = Word.objects.get_or_create(language=polish, word=p)[0]
-            words_ids += [w.id]
-        for e in english_words:
-            w = Word.objects.get_or_create(language=english, word=e)[0]
-            words_ids += [w.id]
-        t = Translation()
-        t.save()
-        t.words.add(*words_ids)
-        return super(TranslationCreateView, self).form_valid(form)
+    def get(self, request, *args, **kwargs):
+        lang1, lang2 = get_languages(self.kwargs)
+        return render(request, 'translation_create.html', {'lang1': lang1, 'lang2': lang2})
+
+    def post(self, request, **kwargs):
+        lang1, lang2 = get_languages(self.kwargs)
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            lang1_words = form.cleaned_data['lang1_words'].split(',')
+            lang2_words = form.cleaned_data['lang2_words'].split(',')
+
+            word_objects = []
+            for w in lang1_words:
+                word_objects += [Word.objects.get_or_create(language=lang1, word=w)[0]]
+            for w in lang2_words:
+                word_objects += [Word.objects.get_or_create(language=lang2, word=w)[0]]
+
+            same_translations = Translation.objects.all()
+            for w in word_objects:
+                same_translations = same_translations.filter(words=w)
+
+            if not same_translations:
+                t = Translation()
+                t.save()
+                t.words.add(*word_objects)
+
+            return self.get(request)
