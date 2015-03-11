@@ -3,8 +3,8 @@
 {% block main %}
     <div class="row">
         <form method="post">{% csrf_token %}
-            <div class="col-sm-5"><input type="text" class="form-control" placeholder="{{ lang1.name }} words" name="lang1_words" data-role="tagsinput"></div>
-            <div class="col-sm-5"><input type="text" class="form-control" placeholder="{{ lang2.name }} words" name="lang2_words" data-role="tagsinput"></div>
+            <div class="col-sm-5"><select name="lang1_words" multiple data-lang="{{ lang1.name }}" data-lang-code="{{ lang1.code }}"></select></div>
+            <div class="col-sm-5"><select name="lang2_words" multiple data-lang="{{ lang2.name }}" data-lang-code="{{ lang2.code }}"></select></div>
             <div class="col-sm-2"><input class="btn btn-primary btn-block" type="submit" value="Create"></div>
         </form>
     </div>

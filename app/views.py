@@ -1,12 +1,10 @@
-from django import forms
-from django.shortcuts import get_object_or_404, render
-from django.views.generic import ListView, FormView, View
-from app.models import Translation, Word, Language
+import json
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.generic import ListView, View
 
-
-def get_languages(kwargs):
-    return \
-        [get_object_or_404(Language, code=kwargs['lang1']), get_object_or_404(Language, code=kwargs['lang2'])]
+from app import get_languages
+from app.models import Translation, Word
 
 
 class TranslationListView(ListView):
@@ -14,25 +12,16 @@ class TranslationListView(ListView):
     template_name = 'translation_list.html'
 
 
-class TranslationCreateForm(forms.Form):
-    # TODO: validator
-    lang1_words = forms.CharField()
-    lang2_words = forms.CharField()
-
-
 class TranslationCreateView(View):
-    form_class = TranslationCreateForm
-
     def get(self, request, *args, **kwargs):
         lang1, lang2 = get_languages(self.kwargs)
         return render(request, 'translation_create.html', {'lang1': lang1, 'lang2': lang2})
 
     def post(self, request, **kwargs):
         lang1, lang2 = get_languages(self.kwargs)
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            lang1_words = form.cleaned_data['lang1_words'].split(',')
-            lang2_words = form.cleaned_data['lang2_words'].split(',')
+        if all(k in request.POST for k in ('lang1_words', 'lang2_words')):
+            lang1_words = request.POST.getlist('lang1_words')
+            lang2_words = request.POST.getlist('lang2_words')
 
             word_objects = []
             for w in lang1_words:
@@ -48,5 +37,17 @@ class TranslationCreateView(View):
                 t = Translation()
                 t.save()
                 t.words.add(*word_objects)
+            else:
+                # TODO: messages
+                pass
+        else:
+            # TODO: messages
+            pass
+        return self.get(request)
 
-            return self.get(request)
+
+class AjaxWordsView(View):
+    def get(self, request, *args, **kwargs):
+        words = Word.objects.filter(word__contains=request.GET['q'], language__code=request.GET['l'])
+        words_list = [{'id': w.word, 'text': w.word} for w in words]
+        return HttpResponse(json.dumps(words_list), content_type="application/json")
