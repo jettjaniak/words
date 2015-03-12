@@ -26,7 +26,21 @@ class TranslationCreateView(View):
             for i, lang in enumerate(get_languages(self.kwargs), start=1):
                 for w in request.POST.getlist('lang%d_words' % i):
                     if re.match(r'^[\w, \'!?\-".]+$', w):
-                        word_objects += [Word.objects.get_or_create(language=lang, word=w)[0]]
+                        # TODO: exclude underscore
+                        word_object = Word.objects.get_or_create(language=lang, word=w)[0]
+                        elementary_words_list = w.strip(',!?".').split(' ')
+                        # if first letter is entire word (not elementary) is capital,
+                        # lower it (in elementary)
+                        if elementary_words_list[0][0].isupper():
+                            elementary_words_list[0] = elementary_words_list[0].lower()
+                        elementary_words_set = set(elementary_words_list)
+                        elementary_words_set.discard('-')
+                        # i don't strip "-" because of words like "well-known"
+                        # and discard them only if there were between spaces
+                        if len(elementary_words_set) > 1:
+                            for ew in elementary_words_set:
+                                word_object.elementary_words.add(Word.objects.get_or_create(language=lang, word=ew)[0])
+                        word_objects += [word_object]
                     else:
                         unallowed_characters = True
                         messages.error(request, 'Unallowed characters in %s words' % lang.name)
