@@ -17,6 +17,16 @@
             <div class="page-header">
                 <h1>{% block header %}{% endblock %}</h1>
             </div>
+            {% if messages %}
+            {% for m in messages %}
+            <div class="alert alert-{% if not m.tags == "error" %}{{ m.tags }}{% else %}danger{% endif %} alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <strong>{{ m.tags|title }}!</strong> {{ m }}
+            </div>
+            {% endfor %}
+            {% endif %}
             {% block main %}{% endblock %}
         </div>
         <script src="{% static 'js/bootstrap.min.js' %}"></script>

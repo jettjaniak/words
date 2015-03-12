@@ -1,5 +1,6 @@
 import json
 from django.http import HttpResponse
+from django.contrib import messages
 from django.shortcuts import render
 from django.views.generic import ListView, View
 
@@ -37,12 +38,11 @@ class TranslationCreateView(View):
                 t = Translation()
                 t.save()
                 t.words.add(*word_objects)
+                messages.success(request, "Translation created.")
             else:
-                # TODO: messages
-                pass
+                messages.warning(request, "Exactly the same translation already exists. Not added.")
         else:
-            # TODO: messages
-            pass
+            messages.error(request, "You need to enter words in both languages.")
         return self.get(request)
 
 
