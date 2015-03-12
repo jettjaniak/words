@@ -4,7 +4,7 @@ $( document ).ready(function() {
         var lang_code = $(this).data('lang-code');
         $(this).select2({
             tags: true,
-            tokenSeparators: [','],
+            tokenSeparators: [';'],
             minimumInputLength: 1,
             placeholder: lang + ' words',
             ajax: {
