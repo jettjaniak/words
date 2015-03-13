@@ -23,7 +23,8 @@ class TranslationCreateView(View):
         if all(k in request.POST for k in ('lang1_words', 'lang2_words')):
             word_objects = []
             unallowed_characters = False
-            for i, lang in enumerate(get_languages(self.kwargs), start=1):
+            languages = get_languages(self.kwargs)
+            for i, lang in enumerate(languages, start=1):
                 for w in request.POST.getlist('lang%d_words' % i):
                     if re.match(r'^[\w, \'!?\-".]+$', w):
                         # TODO: exclude underscore
@@ -54,6 +55,7 @@ class TranslationCreateView(View):
                 if not same_translations:
                     t = Translation()
                     t.save()
+                    t.languages.add(*languages)
                     t.words.add(*word_objects)
                     messages.success(request, "Translation created.")
                 else:

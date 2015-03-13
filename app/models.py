@@ -32,24 +32,14 @@ class Category(models.Model):
 
 class Translation(models.Model):
     words = models.ManyToManyField(Word, related_name='translations')
+    languages = models.ManyToManyField(Language)  # TODO: limit to 2
     categories = models.ManyToManyField(Category)
     note = models.CharField(max_length=400, blank=True, null=True)
-
-    def languages(self):
-        """
-        Returns a list of Language objects occurring in Words
-        (language field) from self.words ManyToMany field.
-        """
-        languages = []
-        for w in self.words.all():
-            if w.language not in languages:
-                languages += [w.language]
-        return languages
 
     def __str__(self):
         """ Eg. "english_word, english_word, ... (en) - polish_word, polish_word, ... (pl)". """
         lang_words_str = []
-        for l in self.languages():
+        for l in self.languages.all():
             lang_words_list = [w.word for w in self.words.filter(language=l)]
             lang_words_str += ["%s (%s)" % (", ".join(lang_words_list), l.code)]
 
